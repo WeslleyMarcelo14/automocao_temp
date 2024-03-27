@@ -13,13 +13,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->label_2->setVisible(estadoPrograma);
     connect(&serial, &QSerialPort::readyRead, this, &MainWindow::readSerial);
 
-    serial.setPortName("COM3");
+    // Colocar a porta que esta o arduino
+    serial.setPortName("COMX");
     serial.setBaudRate(QSerialPort::Baud9600);
     if(!serial.open(QIODevice::ReadWrite)) {
         qDebug() << "Não foi possível abrir a porta serial!";
     }
 
-    ui->spinBox->setRange(15, 30); // Configura o intervalo mínimo e máximo
+    ui->spinBox->setRange(15, 30); // Configura o intervalo mínimo e máximo de temperatura
     connect(ui->spinBox, SIGNAL(valueChanged(int)), this, SLOT(onSpinBoxValueChanged(int)));
 }
 
@@ -33,6 +34,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_radioButton_clicked()
 {
+    // As opções de temperaturas so aparecerem quando o programa "estiver ligado"
     estadoPrograma = ui->radioButton->isChecked();
     ui->spinBox->setVisible(estadoPrograma);
     ui->label_2->setVisible(estadoPrograma);
@@ -53,14 +55,15 @@ void MainWindow::onSpinBoxValueChanged(int value)
 
 void MainWindow::readSerial()
 {
+    // Colocar a temperatura do sensor LM35 no display de qtlcd
     QByteArray serialData = serial.readAll();
     QString dataStr = QString::fromUtf8(serialData).trimmed();
 
     if(dataStr.startsWith("T")) {
         bool ok;
-        double temperature = dataStr.mid(1).toDouble(&ok);
+        double temperatura = dataStr.mid(1).toDouble(&ok);
         if(ok) {
-            ui->lcdNumber->display(temperature);
+            ui->lcdNumber->display(temperatura);
         }
     }
 }
